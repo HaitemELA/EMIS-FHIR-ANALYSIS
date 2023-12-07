@@ -4,13 +4,13 @@ import json
 import uuid
 
 # Specify the root directory containing FHIR bundles (JSON files)
-root_directory = r'C:\Users\Imtech\Downloads\EMIS\Bundles'
+root_directory = r'C:\Users\Imtech\Downloads\EMIS'
 
 # Specify the directory to store modified bundles
 modified_bundles_directory = r'C:\Users\Imtech\Downloads\ModifiedBundles'
 
 # Specify the base URL for the FHIR server
-base_url = "http://localhost:52774/csp/healthshare/test/fhir/r3/"
+base_url = "http://localhost:52775/csp/healthshare/fhir/fhir/r3/"
 
 # Set headers for the request
 headers = {
@@ -206,7 +206,7 @@ def sort_resources(resources):
 
 # Function to create a FHIR bundle from a list of resources
 def create_bundle(resources):
-    bundle = {
+    TransBundle = {
         'resourceType': 'Bundle',
         'type': 'transaction',  # Change type to 'transaction'
         'entry': [
@@ -220,7 +220,18 @@ def create_bundle(resources):
             for resource in resources
         ]
     }
-    return bundle
+    CollBundle = {
+        'resourceType': 'Bundle',
+        'type': 'collection',  # Change type to 'transaction'
+        'entry': [
+            {
+                'resource': resource,
+               
+            }
+            for resource in resources
+        ]
+    }
+    return TransBundle, CollBundle
 
 # Function to store a FHIR bundle as a JSON file
 def store_bundle(bundle, filename):
@@ -229,17 +240,20 @@ def store_bundle(bundle, filename):
         json.dump(bundle, file, ensure_ascii=False, indent=2)
 
 # Function to send a FHIR bundle to the server
-def send_bundle(bundle, json_file_path):
+def send_bundle(TransBundle, CollBundle, json_file_path):
+    # Send transaction bundle to create indivisual entries
     endpoint_url = f"{base_url}"
-    response = requests.post(endpoint_url, headers=headers, json=bundle)
+    endpoint_url = endpoint_url + "Bundle"
+    Transresponse = requests.post(endpoint_url, headers=headers, json=TransBundle)
 
-    if response.status_code not in [200, 201]:
-        print(f"Error {response.status_code} for Bundle: {response.text}")
+    if Transresponse.status_code not in [200, 201]:
+        print(f"Error {Transresponse.status_code} for Bundle: {Transresponse.text}")
         print(f"File path: {json_file_path}")
     else:
-        store_bundle(modified_bundle, filename)
+        store_bundle(TransBundle, filename)
+        ColResponse = requests.post(endpoint_url, headers=headers, json=CollBundle)
 
-
+    
 # Traverse the directory and process FHIR bundles
 for foldername, subfolders, filenames in os.walk(root_directory):
     for filename in filenames:
@@ -262,5 +276,5 @@ for foldername, subfolders, filenames in os.walk(root_directory):
             #for resource in sorted_resources:
             #    send_resource(resource, json_file_path)
 
-            modified_bundle = create_bundle(sorted_resources)
-            send_bundle(modified_bundle, json_file_path)
+            TransBundle, CollBundle = create_bundle(sorted_resources)
+            send_bundle(TransBundle, CollBundle , json_file_path)

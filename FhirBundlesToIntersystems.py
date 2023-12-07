@@ -243,7 +243,7 @@ def store_bundle(bundle, filename):
 def send_bundle(TransBundle, CollBundle, json_file_path):
     # Send transaction bundle to create indivisual entries
     Trans_endpoint_url = f"{base_url}"
-    Col_endpoint_url = endpoint_url + "Bundle"
+    Col_endpoint_url = Trans_endpoint_url + "Bundle"
     Transresponse = requests.post(Trans_endpoint_url, headers=headers, json=TransBundle)
 
     if Transresponse.status_code not in [200, 201]:

@@ -10,7 +10,7 @@ root_directory = r'C:\Users\Imtech\Downloads\EMIS'
 modified_bundles_directory = r'C:\Users\Imtech\Downloads\ModifiedBundles'
 
 # Specify the base URL for the FHIR server
-base_url = "http://localhost:52775/csp/healthshare/fhir/fhir/r3/"
+base_url = "http://localhost:52775/csp/healthshare/fhir/fhir/r3a/"
 
 # Set headers for the request
 headers = {
@@ -242,16 +242,16 @@ def store_bundle(bundle, filename):
 # Function to send a FHIR bundle to the server
 def send_bundle(TransBundle, CollBundle, json_file_path):
     # Send transaction bundle to create indivisual entries
-    endpoint_url = f"{base_url}"
-    endpoint_url = endpoint_url + "Bundle"
-    Transresponse = requests.post(endpoint_url, headers=headers, json=TransBundle)
+    Trans_endpoint_url = f"{base_url}"
+    Col_endpoint_url = endpoint_url + "Bundle"
+    Transresponse = requests.post(Trans_endpoint_url, headers=headers, json=TransBundle)
 
     if Transresponse.status_code not in [200, 201]:
         print(f"Error {Transresponse.status_code} for Bundle: {Transresponse.text}")
         print(f"File path: {json_file_path}")
     else:
         store_bundle(TransBundle, filename)
-        ColResponse = requests.post(endpoint_url, headers=headers, json=CollBundle)
+        ColResponse = requests.post(Col_endpoint_url, headers=headers, json=CollBundle)
 
     
 # Traverse the directory and process FHIR bundles
